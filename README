@@ -1,0 +1,71 @@
+              Nexuiz Ninjaz Present
+			  
+                   v`     _   __                _    
+                  <f     / | / /__  _  ____  __(_)___
+                 .d`    /  |/ / _ \| |/_/ / / / /_  /
+           ..    j(    / /|  /  __/>  </ /_/ / / / /_
+          jQQ,  _2    /_/ |_/\___/_/|_|\__,_/_/ /___/
+       <gmQQW;  d`
+ =c :><QQQQQQk ](   ____                 __                                 __
+  ~{,3QQQQQQQWsf   / __ \___ _   _____  / /___  ____  ____ ___  ___  ____  / /_
+    jQQQQQQQQQW`  / / / / _ \ | / / _ \/ / __ \/ __ \/ __ `__ \/ _ \/ __ \/ __/
+  <mQQQQQQWWWQh  / /_/ /  __/ |/ /  __/ / /_/ / /_/ / / / / / /  __/ / / / /_  
+ .mQQQQQQQc)QQ# /_____/\___/|___/\___/_/\____/ .___/_/ /_/ /_/\___/_/ /_/\__/  
+ =QQQQQQQQQQQQk                             /_/      
+  "$QP!"!4QQQW'       ______            __   
+   -Q;    4QQQ>      /_  __/___  ____  / /___
+   jW`     $WQWc      / / / __ \/ __ \/ /_  /
+  qQE      ]QQQ#     / / / /_/ / /_/ / / / /_
+  ~"`      )QQQW.   /_/  \____/\____/_/ /___/
+             -"$L
+               )Wc
+                "$;
+
+Version: 0.6 Beta
+Released: 05/26/2009
+Created By: Tyler "-z-" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com)
+
+Required Software: subversion (svn)
+Optional Software: 7zip (in a future release)
+
+Description:
+This script was created to help linux users create a local development
+environment easily.  Making up for the downfalls of other build
+scripts, NDT allows you to compile each part of the build process 
+(engine, compiler and game) and modify their revisions seperately.
+
+By default the script exports a vanilla copy for testing of trunk
+and a development version you can hack around in.
+
+TODO:
+ - GUI
+ - option to zip the data directory
+ - option to strip out unneeded files/folders for a server environment
+ - option to build NetRadiant
+ - create a smart loop to accept multiple parameters in one line
+ - option for darkplaces CPU optimization
+
+
+This is an early commit of the work I've done so far on the set of bash
+helper scripts I've dubbed "Nexuiz Development Toolz" which help Linux
+users checkout Darkplaces, FTEQCC and Nexuiz from SVN, compile them and
+optionally export two folders a "vanilla" or untouched version of Nexuiz
+and a "dev" copy for the user to hack around in and learn more about the
+game without worrying about breaking their "main" testing client
+
+Future releases will cover more Nexuiz related helpers, including the
+ability to compile the map making program, NetRadiant.
+
+Thanks to Soulbringer and Victim who's scripts influenced me / helped me
+create this set of functions.
+
+Please read the comments as I've only been working on this for the past
+day and a half, I haven't written much documentation outside that.
+
+I've included icons I use when I add the application to my panel using
+./ndt.sh --run_nexuiz vanilla
+or
+./ndt.sh --run_nexuiz dev
+respectively
+
+-z-
