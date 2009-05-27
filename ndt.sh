@@ -217,6 +217,19 @@ function build_nexuiz {
 	export_nexuiz $1
 }
 
+# Developer Functions
+##################################
+
+# Creates a diff patch based on the difference between dev and vanilla
+function create_patch {
+	if [[ ! -d $nexuiz_vanilla/$prefix$1 ]]; then echo "[ ERROR ] Vanilla directory not found, cannot create patch!"; exit 0; fi
+	if [[ ! -d $nexuiz_dev/$prefix$1 ]]; then echo "[ ERROR ] Dev directory not found, cannot create patch!"; exit 0; fi
+	echo "[x] Creating patch from revision $1: $2"
+	diff -Nru -x *fteqcc.log $nexuiz_vanilla/$prefix$1 $nexuiz_dev/$prefix$1 > $nexuiz_dev/$2
+	echo "[x] Cleaning patch of directory names"
+	sed -i 's#'$nexuiz_vanilla'/'$prefix$1'/##g; s#'$nexuiz_dev'/'$prefix$1'/##g' $nexuiz_dev/$2
+}
+
 # System Functions
 ##################################
 
@@ -252,7 +265,7 @@ function run_nexuiz {
 	fi
 	if [[ "$1" == "dev" || "$1" == "d" ]]; then
 		echo "[x] Starting Nexuiz Development: $latest_build"
-		$nexuiz_dev/$latest_build/nexuiz-$buildtype -basedir $nexuiz_dev/$latest_build
+		$nexuiz_dev/$latest_build/nexuiz-$buildtype -basedir $nexuiz_dev/$latest_build -userdir ~/.nexuiz_dev
 	fi
 }
 
@@ -272,5 +285,6 @@ case $1 in
   --compile_and_build_all) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
   --build_nexuiz) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --run_nexuiz) run_nexuiz $2;;							# runs Nexuiz (specify version v/d)
+  --create_patch) create_patch $2 $3;;					# creates a diff patch by comparing vanilla and dev
 #  *) --help;;
 esac
