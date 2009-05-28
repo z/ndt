@@ -24,7 +24,6 @@
 #  - GUI
 #  - option to zip the data directory
 #  - option to strip out unneeded files/folders for a server environment
-#  - option to build NetRadiant
 #  - create a smart loop to accept multiple parameters in one line
 #  - option for darkplaces CPU optimization
 #
@@ -75,13 +74,19 @@ function checkout_nexuiz {
 	echo "[x] Checking out Nexuiz"
 	checkout_svn $svn_nexuiz $nexuiz_trunk $1 # $1 = revision
 }
+function checkout_netradiant {
+	echo "[x] Checking out NetRadiant"
+	checkout_svn $svn_netradiant $netradiant_trunk $1 # $1 = revision
+}
 function checkout_all {
 	darkplaces_rev=$(echo $1 | awk -F , '{ print $1 }')
 	fteqcc_rev=$(echo $1 | awk -F , '{ print $2 }')
 	nexuiz_rev=$(echo $1 | awk -F , '{ print $3 }')
+	netradiant_rev=$(echo $1 | awk -F , '{ print $4 }')
 	checkout_darkplaces $darkplaces_rev
 	checkout_fteqcc $fteqcc_rev
 	checkout_nexuiz $nexuiz_rev
+	if [[ $with_netradiant == 1 ]]; then checkout_netradiant $netradiant_rev; fi
 }
 
 # Generic SVN Update
@@ -102,13 +107,19 @@ function update_nexuiz {
 	echo "[x] Updating Nexuiz"
 	update_svn $nexuiz_trunk $1 # $1 = revision
 }
+function update_netradiant {
+	echo "[x] Updating NetRadiant"
+	update_svn $netradiant_trunk $1 # $1 = revision
+}
 function update_all {
 	darkplaces_rev=$(echo $1 | awk -F , '{ print $1 }')
 	fteqcc_rev=$(echo $1 | awk -F , '{ print $2 }')
 	nexuiz_rev=$(echo $1 | awk -F , '{ print $3 }')
+	netradiant_rev=$(echo $1 | awk -F , '{ print $4 }')
 	update_darkplaces $darkplaces_rev
 	update_fteqcc $fteqcc_rev
 	update_nexuiz $nexuiz_rev
+	if [[ $with_netradiant == 1 ]]; then update_netradiant $netradiant_rev; fi
 }
 
 # Compiling Functions
@@ -176,6 +187,15 @@ function compile_nexuiz {
 	compile_nexuiz_client $folder || { echo "Error Nexuiz Client compilation failed"; exit 0; }
 	compile_nexuiz_menu $folder || { echo "Error Nexuiz Menu compilation failed"; exit 0; }
 }
+# Compile NetRadiant
+function compile_netradiant {
+	echo "[x] Compiling NetRadiant"
+	cd "$netradiant_trunk"
+	make clean
+	echo "[x] NetRadiant cleaned"
+	make
+	ln -s $netradiant_trunk/install/radiant.x86 $rootdir/netradiant
+}
 
 # compiles everything and exports Nexuiz to directories
 function compile_and_build_all {
@@ -188,6 +208,7 @@ function compile_and_build_all {
 		echo "[x] Creating a copy for development"
 		cp -Rv $latest_build $nexuiz_dev
 	fi
+	if [[ $with_netradiant == 1 ]]; then compile_netradiant || { echo "Error NetRadiant compilation failed"; exit 0; }; fi
 }
 
 # Nexuiz Export and Prep Functions
@@ -241,6 +262,7 @@ function create_patch {
 	sed -i 's#'$nexuiz_vanilla'/'$prefix$1'/##g; s#'$nexuiz_dev'/'$prefix$1'/##g' $nexuiz_dev/$2
 }
 
+# Applies a properly formatted patch file
 function apply_patch {
 	if [[ ! -f $nexuiz_dev/$1 ]]; then echo "[ ERROR ] Specified patch $1 does not exist in $nexuiz_dev!  Please put the patch here to continue."; exit 0; fi
 	if [[ $2 == "" ]]; then
@@ -270,6 +292,7 @@ function apply_patch {
 	link_fteqcc $folder_to_patch # only really needed when copying folder
 }
 
+# Reverts a patch on a specified directory by applying it backwards
 function revert_patch {
 	if [[ ! -f $nexuiz_dev/$1 ]]; then echo "[ ERROR ] Specified patch $1 does not exist in $nexuiz_dev!  Please put the patch here to continue."; exit 0; fi
 	if [[ "$2" =~ [/]+ ]]; then
@@ -298,9 +321,8 @@ function environment_check {
 
 # Icons
 function create_icon {
-	echo "#!/usr/bin/env xdg-open
-
-[Desktop Entry]
+	# testing this function is not ready yet
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Version=1.0
 Type=Application
@@ -365,7 +387,7 @@ ${B}OPTIONS${N}
 
   ${B}General Options${N}
 	${B}--install${N}, ${B}-i${N}
-		First Run ONLY!! Checks out and installs everything from SVN (darkplaces, fteqcc, Nexuiz).
+		First Run ONLY!! Checks out and installs everything from SVN (darkplaces, fteqcc, Nexuiz, NetRadiant (optional in conf)).
 		
 	${B}--upgrade_all${N}, ${B}-u${N}
 		Updates all SVN, compiles and builds all
@@ -374,6 +396,26 @@ ${B}OPTIONS${N}
 		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
 
   ${B}SVN Related Options${N}
+ 	${B}--checkout_darkplaces${N} [${U}revision${N}]
+		Checks Out Darkplaces SVN (optional revison in any SVN style format).
+		Probably shouldn't have to use this.
+		
+	${B}--checkout_fteqcc${N} [${U}revision${N}]
+		Checks Out FTEQCC SVN (optional revison in any SVN style format).
+		Probably shouldn't have to use this.
+		
+	${B}--checkout_nexuiz${N} [${U}revision${N}]
+		Checks Out Nexuiz SVN (optional revison in any SVN style format).
+		Probably shouldn't have to use this.
+
+	${B}--checkout_netradiant${N} [${U}revision${N}]
+		Checks Out NetRadiant SVN (optional revison in any SVN style format).
+		Probably shouldn't have to use this unless you didn't check it out originally
+		
+	${B}--checkout_all${N} [${U}revisions${N}]
+		Checks Out all SVN (optional revison in any SVN style format in the following list format >> darkplaces,fteqcc,nexuiz,netradiant)
+		Probably shouldn't have to use this.
+ 
 	${B}--update_darkplaces${N} [${U}revision${N}], ${B}--ud${N} [${U}revision${N}]
 		Updates Darkplaces SVN (optional revison in any SVN style format)
 		
@@ -382,9 +424,12 @@ ${B}OPTIONS${N}
 		
 	${B}--update_nexuiz${N} [${U}revision${N}], ${B}--un${N} [${U}revision${N}]
 		Updates Nexuiz SVN (optional revison in any SVN style format)
+
+	${B}--update_netradiant${N} [${U}revision${N}], ${B}--ur${N} [${U}revision${N}]
+		Updates NetRadiant SVN (optional revison in any SVN style format)
 		
-	${B}--update_all${N} [${U}revision${N}], ${B}-a${N} [${U}revision${N}]
-		Updates All SVN (optional revison in any SVN style format in the following list format >> darkplaces,fteqcc,nexuiz)
+	${B}--update_all${N} [${U}revisions${N}], ${B}-a${N} [${U}revisions${N}]
+		Updates All SVN (optional revison in any SVN style format in the following list format >> darkplaces,fteqcc,nexuiz,netradiant)
 
   ${B}Compiling and Building${N}
 	${B}--compile_darkplaces${N}, ${B}--cd${N}
@@ -392,10 +437,6 @@ ${B}OPTIONS${N}
 		
 	${B}--compile_fteqcc${N}, ${B}--cf${N}
 		Compiles FTEQCC, no folder needed, stays put.
-		
-	${B}--compile_nexuiz${N} [${U}folder${N}], ${B}--cn${N} [${U}folder${N}], ${B}-c${N} [${U}folder${N}]
-		Compiles Nexuiz in the specified folder
-		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
 	${B}--compile_nexuiz_client${N} [${U}folder${N}], ${B}--cc${N} [${U}folder${N}]
 		Compiles Nexuiz Client in the specified folder
@@ -409,6 +450,13 @@ ${B}OPTIONS${N}
 		Compiles Nexuiz Server in the specified folder,
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
+	${B}--compile_nexuiz${N} [${U}folder${N}], ${B}--cn${N} [${U}folder${N}], ${B}-c${N} [${U}folder${N}]
+		Compiles Nexuiz in the specified folder
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		
+	${B}--compile_netradiant${N}, ${B}--cr${N}
+		Compiles NetRadiant, no folder needed, stays put.
+
 	${B}--compile_and_build_all${N}, ${B}--ca${N}
 		Compiles and builds darkplaces, fteqcc, exports nexuiz to the vanilla folder, then compiles nexuiz and by default copies to nexuiz_dev.
 		
@@ -449,16 +497,23 @@ NDT Version 0.7 Beta  |  May 27, 2009"
 case $1 in
   --install|-i) install;;									# First Run -- checks out and installs everything
   --upgrade_all|-u) upgrade_all;;							# Updates all SVN, compiles and builds all
+  --checkout_darkplaces) checkout_darkplaces;;				# Checkout Darkplaces from SVN
+  --checkout_fteqcc) checkout_fteqcc;;						# Checkout FTEQCC from SVN
+  --checkout_nexuiz) checkout_nexuiz;;						# Checkout Nexuiz from SVN
+  --checkout_netradiant) checkout_netradiant;;				# Checkout NetRadiant from SVN
+  --checkout_all) checkout_all;;							# Checkout everything from SVN
   --update_darkplaces|--ud) update_darkplaces $2;;			# Updates Darkplaces SVN (optional revison)
   --update_fteqcc|--up) update_fteqcc $2;;					# Updates FTEQCC SVN (optional revison)
   --update_nexuiz|--un) update_nexuiz $2;;					# Updates Nexuiz SVN (optional revison)
-  --update_all|-a) update_all $2;;							# Updates all SVN (optional revison -- darkplaces,fteqcc,nexuiz)
+  --update_netradiant|--ur) update_netradiant $2;;			# Updates NetRadiant SVN (optional revison)
+  --update_all|-a) update_all $2;;							# Updates all SVN (optional revison -- darkplaces,fteqcc,nexuiz,netradiant)
   --compile_darkplaces|--cd) compile_darkplaces;;			# Compiles Darkplaces
   --compile_fteqcc|--cf) compile_fteqcc;;					# Compiles FTEQCC
   --compile_nexuiz|--cn|-c) compile_nexuiz $2;;				# Compiles Nexuiz in the specified folder
   --compile_nexuiz_client|--cc) compile_nexuiz_client $2;;	# Compiles Nexuiz Client in the specified folder
   --compile_nexuiz_menu|--cm) compile_nexuiz_menu $2;;		# Compiles Nexuiz Menu in the specified folder
   --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
+  --compile_netradiant|--cr) compile_netradiant;;			# Compiles NetRadiant
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --run_nexuiz|-r) run_nexuiz $2;;							# Runs Nexuiz (specify version v/d)
