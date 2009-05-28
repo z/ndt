@@ -194,6 +194,12 @@ function compile_netradiant {
 	make clean
 	echo "[x] NetRadiant cleaned"
 	make
+	if [[ -d $nexuiz_vanilla && $update_radiant_engine == 1 ]]; then # update engine automatically
+		radiant_userdir=$(ls -t ~/.netradiant | head -n1)
+		engine_path=$(ls -dt $nexuiz_vanilla/*/ | head -n1)
+		sed -i 's#<epair name="EnginePath">.*</epair>#<epair name="EnginePath">'$engine_path'</epair>#' ~/.netradiant/$radiant_userdir/nexuiz.game/local.pref
+	fi
+	if [[ -f $rootdir/netradiant ]]; then rm $rootdir/netradiant; fi
 	ln -s $netradiant_trunk/install/radiant.x86 $rootdir/netradiant
 }
 
@@ -482,7 +488,7 @@ ${B}OPTIONS${N}
 		You're looking at it.
 		
 ${B}FILES${N}
-	${U}default.ndt.conf${N}
+	${U}my.ndt.conf${N}
 		The default configuration file for NDT will all the SVN server settings, paths and customization options.
 		Feel free to create your own and change the source file in the top of ndt.sh
 
