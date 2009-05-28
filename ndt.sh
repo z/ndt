@@ -4,8 +4,8 @@
 # 
 # Nexuiz Development Toolz
 #
-# Version: 0.6 Beta
-# Released: 05/26/2009
+# Version: 0.7 Beta
+# Released: 05/27/2009
 # Created By: Tyler "-z-" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com)
 #
 # Required Software: subversion (svn)
@@ -266,6 +266,7 @@ ${B}SYNOPSIS${N}
 	${B}ndt${N} [${B}option${N}]
 	${B}ndt${N} [${B}option${N}] [${B}folder${N}]
 	${B}ndt${N} [${B}option${N}] [${B}revision${N}]
+	${B}ndt${N} ${B}--run_nexuiz${N} [${B}vanilla${N}|${B}dev${N}|${B}v${N}|${B}d${N}]
 
 ${B}DESCRIPTION${N}
 	This script was created to help linux users create a local development environment easily.
@@ -277,23 +278,74 @@ ${B}DESCRIPTION${N}
 ${B}OPTIONS${N}
 	${B}--install${N}, ${B}-i${N}
 		First Run -- checks out and installs everything
-	--upgrade_all, -u
+		
+	${B}--upgrade_all${N}, ${B}-u${N}
 		Updates all SVN, compiles and builds all
-	--update_darkplaces, --ud) update_darkplaces $2;;		# Updates Darkplaces SVN (optional revison)
-	--update_fteqcc|--up) update_fteqcc $2;;				# Updates FTEQCC SVN (optional revison)
-	--update_nexuiz|--un) update_nexuiz $2;;				# Updates Nexuiz SVN (optional revison)
-	--update_all|-a) update_all $2;;						# Updates all SVN (optional revison -- darkplaces,fteqcc,nexuiz)
-	--compile_darkplaces|--cd) compile_darkplaces;;			# Compiles Darkplaces
-	--compile_fteqcc|--cf) compile_fteqcc;;					# Compiles FTEQCC
-	--compile_nexuiz|--cn|-c) compile_nexuiz $2;;				# Compiles Nexuiz in the specified folder
-	--compile_nexuiz_client|--cc) compile_nexuiz_client $2;;	# Compiles Nexuiz Client in the specified folder
-	--compile_nexuiz_menu|--cm) compile_nexuiz_menu $2;;		# Compiles Nexuiz Menu in the specified folder
-	--compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
-	--compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
-	--build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
-	--run_nexuiz|-r) run_nexuiz $2;;							# runs Nexuiz (specify version v/d)
-	--create_patch|-p) create_patch $2 $3;;					# creates a diff patch by comparing vanilla and dev
-	*||--help|-h) --help;;"
+		
+	${B}--update_darkplaces${N} [${U}revision${N}], ${B}--ud${N} [${U}revision${N}]
+		Updates Darkplaces SVN (optional revison in any SVN style format)
+		
+	${B}--update_fteqcc${N} [${U}revision${N}], ${B}--up${N} [${U}revision${N}]
+		Updates FTEQCC SVN (optional revison in any SVN style format)
+		
+	${B}--update_nexuiz${N} [${U}revision${N}], ${B}--un${N} [${U}revision${N}]
+		Updates Nexuiz SVN (optional revison in any SVN style format)
+		
+	${B}--update_all${N} [${U}revision${N}], ${B}-a${N} [${U}revision${N}]
+		Updates All SVN (optional revison in any SVN style format in the following list format >> darkplaces,fteqcc,nexuiz)
+		
+	${B}--compile_darkplaces${N}, ${B}--cd${N}
+		Compiles Darkplaces, no folder needed, stays put.
+		
+	${B}--compile_fteqcc${N}, ${B}--cf${N}
+		Compiles FTEQCC, no folder needed, stays put.
+		
+	${B}--compile_nexuiz${N} [${U}folder${N}], ${B}--cn${N} [${U}folder${N}], ${B}-c${N} [${U}folder${N}]
+		Compiles Nexuiz in the specified folder
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		
+	${B}--compile_nexuiz_client${N} [${U}folder${N}], ${B}--cc${N} [${U}folder${N}]
+		Compiles Nexuiz Client in the specified folder
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		
+	${B}--compile_nexuiz_menu${N} [${U}folder${N}], ${B}--cm${N} [${U}folder${N}]
+		Compiles Nexuiz Menu in the specified folder
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		
+	${B}--compile_nexuiz_server${N} [${U}folder${N}], ${B}--cs${N} [${U}folder${N}]
+		Compiles Nexuiz Server in the specified folder,
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		
+	${B}--compile_and_build_all${N} [${U}folder${N}], ${B}--ca${N} [${U}folder${N}]
+		Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
+		${U}folder example${N}: /path/to/nexuiz_dev
+		
+	${B}--build_nexuiz${N} [${U}folder${N}], ${B}-b${N} [${U}folder${N}]
+		Builds Nexuiz in the speicified folder
+		${U}folder example${N}: /path/to/nexuiz_dev
+		
+	${B}--run_nexuiz${N} [${U}version${N}], ${B}-r${N} [${U}version${N}]
+		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
+		
+	${B}--create_patch${N}, ${B}-p${N} <${U}revision${N}> <${U}patch name${N}>
+		Creates a diff patch by comparing the vanilla and dev folders.  The same revision must exists in both folders.
+		The patch will be ouput to nexuiz_dev
+		${U}folder example${N}: nexuiz_vanilla/${prefix}_6677 and nexuiz_dev/${prefix}_6677
+		
+	${B}--help${N}, ${B}-h${N}
+		You're looking at it.
+		
+${B}FILES${N}
+	${U}default.ndt.conf${N}
+		The default configuration file for NDT will all the SVN server settings, paths and customization options.
+		Feel free to create your own and change the source file in the top of ndt.sh
+
+${B}AUTHOR${N}
+	This program and help file were written by Tyler \"-z-\" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com).
+	
+	Permission is granted to copy, distribute and/or modify this document under the terms of the MIT License.
+	
+NDT Version 0.7 Beta  |  May 27, 2009"
 }
 
 case $1 in
