@@ -368,9 +368,8 @@ ${B}OPTIONS${N}
 		Compiles Nexuiz Server in the specified folder,
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_and_build_all${N} [${U}folder${N}], ${B}--ca${N} [${U}folder${N}]
-		Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
-		${U}folder example${N}: /path/to/nexuiz_dev
+	${B}--compile_and_build_all${N}, ${B}--ca${N}
+		Compiles and builds darkplaces, fteqcc, exports nexuiz to the vanilla folder, then compiles nexuiz and by default copies to nexuiz_dev.
 		
 	${B}--build_nexuiz${N} <${U}folder${N}>, ${B}-b${N} <${U}folder${N}>
 		Builds Nexuiz in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz${N}
