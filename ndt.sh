@@ -263,9 +263,11 @@ function create_patch {
 	if [[ ! -d $nexuiz_vanilla/$prefix$1 ]]; then echo "[ ERROR ] Vanilla directory not found, cannot create patch!"; exit 0; fi
 	if [[ ! -d $nexuiz_dev/$prefix$1 ]]; then echo "[ ERROR ] Dev directory not found, cannot create patch!"; exit 0; fi
 	echo "[x] Creating patch from revision $1: $2"
-	diff -Nru -x *fteqcc.log $nexuiz_vanilla/$prefix$1 $nexuiz_dev/$prefix$1 > $nexuiz_dev/$2
+	echo "[[ Patch \"$2\" created with NDT for Nexuiz revision: $1 ]]" > $nexuiz_dev/$2
+	diff -Nru -x *fteqcc.log $nexuiz_vanilla/$prefix$1 $nexuiz_dev/$prefix$1 > $nexuiz_dev/${2}.tmp
 	echo "[x] Cleaning patch of directory names"
-	sed -i 's#'$nexuiz_vanilla'/'$prefix$1'/##g; s#'$nexuiz_dev'/'$prefix$1'/##g' $nexuiz_dev/$2
+	sed -i 's#'$nexuiz_vanilla'/'$prefix$1'/##g; s#'$nexuiz_dev'/'$prefix$1'/##g' $nexuiz_dev/${2}.tmp
+	cat $nexuiz_dev/${2}.tmp >> $nexuiz_dev/$2
 }
 
 # Applies a properly formatted patch file
