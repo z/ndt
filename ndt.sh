@@ -215,6 +215,24 @@ function create_patch {
 	sed -i 's#'$nexuiz_vanilla'/'$prefix$1'/##g; s#'$nexuiz_dev'/'$prefix$1'/##g' $nexuiz_dev/$2
 }
 
+function apply_patch {
+	if [[ ! -f $nexuiz_dev/$1 ]]; then echo "[ ERROR ] Specified patch $1 does not exist in $nexuiz_dev!  Please put the patch here to continue."; exit 0; fi
+	if [[ $2 == "" ]]; then
+		echo "[ WARNING ] Revision not specified, using latest exported revision!";
+		rev=$(ls -t $nexuiz_vanilla | head -n1);
+	else
+		rev=$prefix$2
+	fi
+	if [[ ! -d $nexuiz_vanilla/$rev ]]; then echo "[ ERROR ] Specific revision not found in vanilla directory not found, cannot apply patch!"; exit 0; fi
+	echo "[x] Creating a copy for patching"
+	cp -Rv $nexuiz_vanilla/$rev $nexuiz_dev/${rev}_patched
+	echo "[x] Patching $rev"
+	cp $nexuiz_dev/$1 $nexuiz_dev/${rev}_patched
+	cd $nexuiz_dev/${rev}_patched
+	patch -p0 < $1
+	rm $1
+}
+
 # System Functions
 ##################################
 
@@ -264,7 +282,7 @@ ${B}NAME${N}
 
 ${B}SYNOPSIS${N}
 	${B}ndt${N} [${B}option${N}]
-	${B}ndt${N} [${B}option${N}] [${B}folder${N}]
+	${B}ndt${N} [${B}option${N}] <${B}folder${N}>
 	${B}ndt${N} [${B}option${N}] [${B}revision${N}]
 	${B}ndt${N} ${B}--run_nexuiz${N} [${B}vanilla${N}|${B}dev${N}|${B}v${N}|${B}d${N}]
 
@@ -300,37 +318,40 @@ ${B}OPTIONS${N}
 	${B}--compile_fteqcc${N}, ${B}--cf${N}
 		Compiles FTEQCC, no folder needed, stays put.
 		
-	${B}--compile_nexuiz${N} [${U}folder${N}], ${B}--cn${N} [${U}folder${N}], ${B}-c${N} [${U}folder${N}]
+	${B}--compile_nexuiz${N} <${U}folder${N}>, ${B}--cn${N} <${U}folder${N}>, ${B}-c${N} <${U}folder${N}>
 		Compiles Nexuiz in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_nexuiz_client${N} [${U}folder${N}], ${B}--cc${N} [${U}folder${N}]
+	${B}--compile_nexuiz_client${N} <${U}folder${N}>, ${B}--cc${N} <${U}folder${N}>
 		Compiles Nexuiz Client in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_nexuiz_menu${N} [${U}folder${N}], ${B}--cm${N} [${U}folder${N}]
+	${B}--compile_nexuiz_menu${N} <${U}folder${N}>, ${B}--cm${N} <${U}folder${N}>
 		Compiles Nexuiz Menu in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_nexuiz_server${N} [${U}folder${N}], ${B}--cs${N} [${U}folder${N}]
+	${B}--compile_nexuiz_server${N} <${U}folder${N}>, ${B}--cs${N} <${U}folder${N}>
 		Compiles Nexuiz Server in the specified folder,
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_and_build_all${N} [${U}folder${N}], ${B}--ca${N} [${U}folder${N}]
+	${B}--compile_and_build_all${N} <${U}folder${N}>, ${B}--ca${N} <${U}folder${N}>
 		Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
 		${U}folder example${N}: /path/to/nexuiz_dev
 		
-	${B}--build_nexuiz${N} [${U}folder${N}], ${B}-b${N} [${U}folder${N}]
+	${B}--build_nexuiz${N} <${U}folder${N}>, ${B}-b${N} <${U}folder${N}>
 		Builds Nexuiz in the speicified folder
 		${U}folder example${N}: /path/to/nexuiz_dev
 		
 	${B}--run_nexuiz${N} [${U}version${N}], ${B}-r${N} [${U}version${N}]
 		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
 		
-	${B}--create_patch${N}, ${B}-p${N} <${U}revision${N}> <${U}patch name${N}>
+	${B}--create_patch${N} <${U}revision${N}> <${U}patch name${N}>, ${B}--cp${N} <${U}revision${N}> <${U}patch name${N}>
 		Creates a diff patch by comparing the vanilla and dev folders.  The same revision must exists in both folders.
 		The patch will be ouput to nexuiz_dev
 		${U}folder example${N}: nexuiz_vanilla/${prefix}_6677 and nexuiz_dev/${prefix}_6677
+
+	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}]
+		Copies a folder from vanilla and then patches it with the specified patch name.
 		
 	${B}--help${N}, ${B}-h${N}
 		You're looking at it.
@@ -363,7 +384,8 @@ case $1 in
   --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
-  --run_nexuiz|-r) run_nexuiz $2;;							# runs Nexuiz (specify version v/d)
-  --create_patch|-p) create_patch $2 $3;;					# creates a diff patch by comparing vanilla and dev
+  --run_nexuiz|-r) run_nexuiz $2;;							# Runs Nexuiz (specify version v/d)
+  --create_patch|--cp) create_patch $2 $3;;					# Creates a diff patch by comparing vanilla and dev
+  --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision]
   *|--help|-h) help;;
 esac
