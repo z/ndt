@@ -52,7 +52,8 @@
 #
 
 # Configuration
-source default.ndt.conf
+core_dir=$(cd $(dirname $0); pwd)
+source $core_dir/default.ndt.conf
 
 # SVN Functions
 ##################################
@@ -199,8 +200,8 @@ function compile_netradiant {
 		engine_path=$(ls -dt $nexuiz_vanilla/*/ | head -n1)
 		sed -i 's#<epair name="EnginePath">.*</epair>#<epair name="EnginePath">'$engine_path'</epair>#' ~/.netradiant/$radiant_userdir/nexuiz.game/local.pref
 	fi
-	if [[ -f $rootdir/netradiant ]]; then rm $rootdir/netradiant; fi
-	ln -s $netradiant_trunk/install/radiant.x86 $rootdir/netradiant
+	if [[ -f $core_dir/netradiant ]]; then rm $core_dir/netradiant; fi
+	ln -s $netradiant_trunk/install/radiant.x86 $core_dir/netradiant
 }
 
 # compiles everything and exports Nexuiz to directories
@@ -321,10 +322,10 @@ function revert_patch {
 
 # Checks system for dependencies - borrowed from Soulbringer
 function environment_check {
-	if [[ ! ( -w "$rootdir" && -r "$rootdir" && -x "$rootdir" ) ]]; then echo "[ ERROR ] $rootdir does not have RWX permissions, please fix this and run this script again";exit 0;fi
+	if [[ ! ( -w "$core_dir" && -r "$core_dir" && -x "$core_dir" ) ]]; then echo "[ ERROR ] $core_dir does not have RWX permissions, please fix this and run this script again";exit 0;fi
 	if [[ ! -x $( whereis svn | sed "s/svn: //" | sed "s/ .*//" ) ]]; then echo "[ ERROR ] Couldnt locate subversion, please install it and run this script again";exit 0;fi
 	#if [[ ! -x $( whereis 7z | sed "s/7z: //" | sed "s/ .*//" ) ]]; then has7zip=0 ;else has7zip=1;fi
-	if [[ ! -d "$rootdir/svn" ]]; then echo "[x] Creating svn folder"; mkdir "$rootdir/svn";fi
+	if [[ ! -d "$core_dir/svn" ]]; then echo "[x] Creating svn folder"; mkdir "$core_dir/svn";fi
 }
 
 # Icons
@@ -359,14 +360,15 @@ function upgrade_all {
 }
 
 function run_nexuiz {
-	latest_build=$(ls -t $nexuiz_vanilla | head -n1)
 	if [[ "$1" == "vanilla" || "$1" == "v" || "$1" == "" ]]; then
+		latest_build=$(ls -dt $nexuiz_vanilla/*/ | head -n1 | sed 's/\/*$//')
 		echo "[x] Starting Nexuiz Vanilla: $latest_build"
-		$nexuiz_vanilla/$latest_build/nexuiz-$buildtype -basedir $nexuiz_vanilla/$latest_build -userdir ~/.nexuiz_vanilla
+		$latest_build/nexuiz-$buildtype -basedir $latest_build -userdir ~/.nexuiz_vanilla
 	fi
 	if [[ "$1" == "dev" || "$1" == "d" ]]; then
+		latest_build=$(ls -dt $nexuiz_dev/*/ | head -n1 | sed 's/\/*$//')
 		echo "[x] Starting Nexuiz Development: $latest_build"
-		$nexuiz_dev/$latest_build/nexuiz-$buildtype -basedir $nexuiz_dev/$latest_build -userdir ~/.nexuiz_dev
+		$latest_build/nexuiz-$buildtype -basedir $latest_build -userdir ~/.nexuiz_dev
 	fi
 }
 
