@@ -133,24 +133,48 @@ function compile_fteqcc {
 }
 # Compile Nexuiz
 function compile_nexuiz_client {
+	if [[ $1 == "" ]]; then
+		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+	else
+		folder=$1
+	fi
 	echo "[x] Compiling Nexuiz Client"
-	cd "$1/data/qcsrc/client" # $1 = folder
+	cd "$folder/data/qcsrc/client"
 	./fteqcc.bin
 }
 function compile_nexuiz_menu {
+	if [[ $1 == "" ]]; then
+		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+	else
+		folder=$1
+	fi
 	echo "[x] Compiling Nexuiz Menu"
-	cd "$1/data/qcsrc/menu" # $1 = folder
+	cd "$folder/data/qcsrc/menu"
 	./fteqcc.bin
 }
 function compile_nexuiz_server {
+	if [[ $1 == "" ]]; then
+		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+	else
+		folder=$1
+	fi
 	echo "[x] Compiling Nexuiz Server"
-	cd "$1/data/qcsrc/server" # $1 = folder
+	cd "$folder/data/qcsrc/server"
 	./fteqcc.bin
 }
-function compile_nexuiz { # $1 = folder
-	compile_nexuiz_server $1 || { echo "Error Nexuiz Server compilation failed"; exit 0; }
-	compile_nexuiz_client $1 || { echo "Error Nexuiz Client compilation failed"; exit 0; }
-	compile_nexuiz_menu $1 || { echo "Error Nexuiz Menu compilation failed"; exit 0; }
+function compile_nexuiz {
+	if [[ $1 == "" ]]; then
+		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+	else
+		folder=$1
+	fi
+	compile_nexuiz_server $folder || { echo "Error Nexuiz Server compilation failed"; exit 0; }
+	compile_nexuiz_client $folder || { echo "Error Nexuiz Client compilation failed"; exit 0; }
+	compile_nexuiz_menu $folder || { echo "Error Nexuiz Menu compilation failed"; exit 0; }
 }
 
 # compiles everything and exports Nexuiz to directories
@@ -160,9 +184,9 @@ function compile_and_build_all {
 	build_nexuiz $nexuiz_vanilla
 	if [[ $with_dev == 1 ]]; then
 		if [[ ! -d $nexuiz_dev ]]; then mkdir $nexuiz_dev; fi
-		latest_build=$(ls -t $nexuiz_vanilla | head -n1)
+		latest_build=$(ls -dt $nexuiz_vanilla/*/ | head -n1)
 		echo "[x] Creating a copy for development"
-		cp -Rv $nexuiz_vanilla/$latest_build $nexuiz_dev
+		cp -Rv $latest_build $nexuiz_dev
 	fi
 }
 
@@ -190,15 +214,17 @@ function export_nexuiz {
 
 # links fteqcc to the nexuiz directories that use the compiler
 function link_fteqcc { # $1 = folder
+	if [[ -f $1/data/qcsrc/server/fteqcc.bin ]]; then rm $1/data/qcsrc/server/fteqcc.bin; fi
 	ln -s $fteqcc_trunk/fteqcc.bin $1/data/qcsrc/server
+	if [[ -f $1/data/qcsrc/client/fteqcc.bin ]]; then rm $1/data/qcsrc/client/fteqcc.bin; fi
 	ln -s $fteqcc_trunk/fteqcc.bin $1/data/qcsrc/client
+	if [[ -f $1/data/qcsrc/menu/fteqcc.bin ]]; then rm $1/data/qcsrc/menu/fteqcc.bin; fi
 	ln -s $fteqcc_trunk/fteqcc.bin $1/data/qcsrc/menu
 }
 
 # Builds Nexuiz in a specific directory
 function build_nexuiz {
-	# $1 = folder
-	if [[ ! -d $1 ]]; then mkdir $1; fi
+	if [[ ! -d $1 ]]; then mkdir $1; fi # $1 = folder
 	export_nexuiz $1
 }
 
@@ -231,6 +257,7 @@ function apply_patch {
 	cd $nexuiz_dev/${rev}_patched
 	patch -p0 < $1
 	rm $1
+	link_fteqcc $nexuiz_dev/${rev}_patched
 }
 
 # System Functions
@@ -294,12 +321,18 @@ ${B}DESCRIPTION${N}
 	Homepage: http://github.com/z/ndt
 
 ${B}OPTIONS${N}
+
+  ${B}General Options${N}
 	${B}--install${N}, ${B}-i${N}
-		First Run -- checks out and installs everything
+		First Run ONLY!! Checks out and installs everything from SVN (darkplaces, fteqcc, Nexuiz).
 		
 	${B}--upgrade_all${N}, ${B}-u${N}
 		Updates all SVN, compiles and builds all
-		
+
+	${B}--run_nexuiz${N} [${U}version${N}], ${B}-r${N} [${U}version${N}]
+		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
+
+  ${B}SVN Related Options${N}
 	${B}--update_darkplaces${N} [${U}revision${N}], ${B}--ud${N} [${U}revision${N}]
 		Updates Darkplaces SVN (optional revison in any SVN style format)
 		
@@ -311,40 +344,39 @@ ${B}OPTIONS${N}
 		
 	${B}--update_all${N} [${U}revision${N}], ${B}-a${N} [${U}revision${N}]
 		Updates All SVN (optional revison in any SVN style format in the following list format >> darkplaces,fteqcc,nexuiz)
-		
+
+  ${B}Compiling and Building${N}
 	${B}--compile_darkplaces${N}, ${B}--cd${N}
 		Compiles Darkplaces, no folder needed, stays put.
 		
 	${B}--compile_fteqcc${N}, ${B}--cf${N}
 		Compiles FTEQCC, no folder needed, stays put.
 		
-	${B}--compile_nexuiz${N} <${U}folder${N}>, ${B}--cn${N} <${U}folder${N}>, ${B}-c${N} <${U}folder${N}>
+	${B}--compile_nexuiz${N} [${U}folder${N}], ${B}--cn${N} [${U}folder${N}], ${B}-c${N} [${U}folder${N}]
 		Compiles Nexuiz in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_nexuiz_client${N} <${U}folder${N}>, ${B}--cc${N} <${U}folder${N}>
+	${B}--compile_nexuiz_client${N} [${U}folder${N}], ${B}--cc${N} [${U}folder${N}]
 		Compiles Nexuiz Client in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_nexuiz_menu${N} <${U}folder${N}>, ${B}--cm${N} <${U}folder${N}>
+	${B}--compile_nexuiz_menu${N} [${U}folder${N}], ${B}--cm${N} [${U}folder${N}]
 		Compiles Nexuiz Menu in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_nexuiz_server${N} <${U}folder${N}>, ${B}--cs${N} <${U}folder${N}>
+	${B}--compile_nexuiz_server${N} [${U}folder${N}], ${B}--cs${N} [${U}folder${N}]
 		Compiles Nexuiz Server in the specified folder,
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
 		
-	${B}--compile_and_build_all${N} <${U}folder${N}>, ${B}--ca${N} <${U}folder${N}>
+	${B}--compile_and_build_all${N} [${U}folder${N}], ${B}--ca${N} [${U}folder${N}]
 		Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
 		${U}folder example${N}: /path/to/nexuiz_dev
 		
 	${B}--build_nexuiz${N} <${U}folder${N}>, ${B}-b${N} <${U}folder${N}>
-		Builds Nexuiz in the speicified folder
+		Builds Nexuiz in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz${N}
 		${U}folder example${N}: /path/to/nexuiz_dev
 		
-	${B}--run_nexuiz${N} [${U}version${N}], ${B}-r${N} [${U}version${N}]
-		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
-		
+  ${B}Developer Extras${N}	
 	${B}--create_patch${N} <${U}revision${N}> <${U}patch name${N}>, ${B}--cp${N} <${U}revision${N}> <${U}patch name${N}>
 		Creates a diff patch by comparing the vanilla and dev folders.  The same revision must exists in both folders.
 		The patch will be ouput to nexuiz_dev
@@ -352,7 +384,8 @@ ${B}OPTIONS${N}
 
 	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}]
 		Copies a folder from vanilla and then patches it with the specified patch name.
-		
+
+  ${B}Getting Help${N}
 	${B}--help${N}, ${B}-h${N}
 		You're looking at it.
 		
