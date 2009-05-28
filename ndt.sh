@@ -52,23 +52,8 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# SVN URLs
-svn_fteqcc="https://fteqw.svn.sourceforge.net/svnroot/fteqw/trunk/engine/qclib/"
-svn_nexuiz="svn://svn.icculus.org/nexuiz/trunk/"
-svn_darkplaces="svn://svn.icculus.org/twilight/trunk/darkplaces/"
-
-# local settings
-rootdir=/home/tyler/nn_dev/nexuiz			# Root path of your Nexuiz development environment
-nexuiz_vanilla=$rootdir/nexuiz_vanilla		# Path to SVN builds of Nexuiz - Vanilla
-nexuiz_dev=$rootdir/nexuiz_dev				# Path to SVN builds of Nexuiz - For Development
-darkplaces_trunk=$rootdir/svn/darkplaces	# Path to DarkPlaces SVN trunk 
-fteqcc_trunk=$rootdir/svn/fteqcc			# Path to FTEQCC SVN trunk
-nexuiz_trunk=$rootdir/svn/nexuiz/trunk		# Path to Nexuiz SVN trunk
-
-# Customization
-buildtype="glx"		# Nexuiz glx or sdl?
-prefix="rev_"		# Folder prefix
-with_dev=1			# Do a "development copy" you can hack around in? (1 = true; 0 = false)
+# Configuration
+source default.ndt.conf
 
 # SVN Functions
 ##################################
@@ -261,7 +246,7 @@ function run_nexuiz {
 	latest_build=$(ls -t $nexuiz_vanilla | head -n1)
 	if [[ "$1" == "vanilla" || "$1" == "v" || "$1" == "" ]]; then
 		echo "[x] Starting Nexuiz Vanilla: $latest_build"
-		$nexuiz_vanilla/$latest_build/nexuiz-$buildtype -basedir $nexuiz_vanilla/$latest_build
+		$nexuiz_vanilla/$latest_build/nexuiz-$buildtype -basedir $nexuiz_vanilla/$latest_build -userdir ~/.nexuiz_vanilla
 	fi
 	if [[ "$1" == "dev" || "$1" == "d" ]]; then
 		echo "[x] Starting Nexuiz Development: $latest_build"
@@ -269,22 +254,64 @@ function run_nexuiz {
 	fi
 }
 
+function help {
+	B=$(tput bold) # bold
+	U=$(tput smul) # underline
+	N=$(tput sgr0) # normal
+	echo "
+${B}NAME${N}
+	ndt - Nexuiz Development Toolz
+
+${B}SYNOPSIS${N}
+	${B}ndt${N} [${B}option${N}]
+	${B}ndt${N} [${B}option${N}] [${B}folder${N}]
+	${B}ndt${N} [${B}option${N}] [${B}revision${N}]
+
+${B}DESCRIPTION${N}
+	This script was created to help linux users create a local development environment easily.
+	Making up for the downfalls of other build scripts, NDT allows you to compile each part of the build process.
+	The engine, compiler and game, and modify their revisions seperately.
+	
+	Homepage: http://github.com/z/ndt
+
+${B}OPTIONS${N}
+	${B}--install${N}, ${B}-i${N}
+		First Run -- checks out and installs everything
+	--upgrade_all, -u
+		Updates all SVN, compiles and builds all
+	--update_darkplaces, --ud) update_darkplaces $2;;		# Updates Darkplaces SVN (optional revison)
+	--update_fteqcc|--up) update_fteqcc $2;;				# Updates FTEQCC SVN (optional revison)
+	--update_nexuiz|--un) update_nexuiz $2;;				# Updates Nexuiz SVN (optional revison)
+	--update_all|-a) update_all $2;;						# Updates all SVN (optional revison -- darkplaces,fteqcc,nexuiz)
+	--compile_darkplaces|--cd) compile_darkplaces;;			# Compiles Darkplaces
+	--compile_fteqcc|--cf) compile_fteqcc;;					# Compiles FTEQCC
+	--compile_nexuiz|--cn|-c) compile_nexuiz $2;;				# Compiles Nexuiz in the specified folder
+	--compile_nexuiz_client|--cc) compile_nexuiz_client $2;;	# Compiles Nexuiz Client in the specified folder
+	--compile_nexuiz_menu|--cm) compile_nexuiz_menu $2;;		# Compiles Nexuiz Menu in the specified folder
+	--compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
+	--compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
+	--build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
+	--run_nexuiz|-r) run_nexuiz $2;;							# runs Nexuiz (specify version v/d)
+	--create_patch|-p) create_patch $2 $3;;					# creates a diff patch by comparing vanilla and dev
+	*||--help|-h) --help;;"
+}
+
 case $1 in
-  --install) install;;									# First Run -- checks out and installs everything
-  --upgrade_all) upgrade_all;;							# Updates all SVN, compiles and builds all
-  --update_darkplaces) update_darkplaces $2;;			# Updates Darkplaces SVN (optional revison)
-  --update_fteqcc) update_fteqcc $2;;					# Updates FTEQCC SVN (optional revison)
-  --update_nexuiz) update_nexuiz $2;;					# Updates Nexuiz SVN (optional revison)
-  --update_all) update_all $2;;							# Updates all SVN (optional revison -- darkplaces,fteqcc,nexuiz)
-  --compile_darkplaces) compile_darkplaces;;			# Compiles Darkplaces
-  --compile_fteqcc) compile_fteqcc;;					# Compiles FTEQCC
-  --compile_nexuiz) compile_nexuiz $2;;					# Compiles Nexuiz in the specified folder
-  --compile_nexuiz_client) compile_nexuiz_client $2;;	# Compiles Nexuiz Client in the specified folder
-  --compile_nexuiz_menu) compile_nexuiz_menu $2;;		# Compiles Nexuiz Menu in the specified folder
-  --compile_nexuiz_server) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
-  --compile_and_build_all) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
-  --build_nexuiz) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
-  --run_nexuiz) run_nexuiz $2;;							# runs Nexuiz (specify version v/d)
-  --create_patch) create_patch $2 $3;;					# creates a diff patch by comparing vanilla and dev
-#  *) --help;;
+  --install|-i) install;;									# First Run -- checks out and installs everything
+  --upgrade_all|-u) upgrade_all;;							# Updates all SVN, compiles and builds all
+  --update_darkplaces|--ud) update_darkplaces $2;;			# Updates Darkplaces SVN (optional revison)
+  --update_fteqcc|--up) update_fteqcc $2;;					# Updates FTEQCC SVN (optional revison)
+  --update_nexuiz|--un) update_nexuiz $2;;					# Updates Nexuiz SVN (optional revison)
+  --update_all|-a) update_all $2;;							# Updates all SVN (optional revison -- darkplaces,fteqcc,nexuiz)
+  --compile_darkplaces|--cd) compile_darkplaces;;			# Compiles Darkplaces
+  --compile_fteqcc|--cf) compile_fteqcc;;					# Compiles FTEQCC
+  --compile_nexuiz|--cn|-c) compile_nexuiz $2;;				# Compiles Nexuiz in the specified folder
+  --compile_nexuiz_client|--cc) compile_nexuiz_client $2;;	# Compiles Nexuiz Client in the specified folder
+  --compile_nexuiz_menu|--cm) compile_nexuiz_menu $2;;		# Compiles Nexuiz Menu in the specified folder
+  --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
+  --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
+  --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
+  --run_nexuiz|-r) run_nexuiz $2;;							# runs Nexuiz (specify version v/d)
+  --create_patch|-p) create_patch $2 $3;;					# creates a diff patch by comparing vanilla and dev
+  *|--help|-h) help;;
 esac
