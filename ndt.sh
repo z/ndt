@@ -245,19 +245,33 @@ function apply_patch {
 	if [[ ! -f $nexuiz_dev/$1 ]]; then echo "[ ERROR ] Specified patch $1 does not exist in $nexuiz_dev!  Please put the patch here to continue."; exit 0; fi
 	if [[ $2 == "" ]]; then
 		echo "[ WARNING ] Revision not specified, using latest exported revision!";
-		rev=$(ls -t $nexuiz_vanilla | head -n1);
+		vanilla_rev=$(ls -dt $nexuiz_vanilla/*/ | head -n1 | sed 's/\/*$//')
+		rev=$(echo $vanilla_rev | awk -F / '{ print $NF }' | awk -F _ '{ print $NF }')
 	else
-		rev=$prefix$2
+		if [[ "$2" =~ ^[0-9]+$ ]]; then
+			vanilla_rev=$nexuiz_vanilla/$prefix$2
+			rev=$2
+		elif [[ "$2" =~ [/]+ ]]; then
+			folder_to_patch=$2
+			rev=$(echo $folder_to_patch | awk -F / '{ print $NF }')
+		fi
 	fi
-	if [[ ! -d $nexuiz_vanilla/$rev ]]; then echo "[ ERROR ] Specific revision not found in vanilla directory not found, cannot apply patch!"; exit 0; fi
-	echo "[x] Creating a copy for patching"
-	cp -Rv $nexuiz_vanilla/$rev $nexuiz_dev/${rev}_patched
+	if [[ ! -d $vanilla_rev && "$folder_to_patch" == "" ]]; then echo "[ ERROR ] Specific revision not found in vanilla directory not found, cannot apply patch!"; exit 0; fi
+	if [[ "$folder_to_patch" == "" ]]; then
+		echo "[x] Creating a copy for patching"
+		cp -Rv $vanilla_rev $nexuiz_dev/$prefix${rev}_patched
+		folder_to_patch=$nexuiz_dev/$prefix${rev}_patched
+	fi
 	echo "[x] Patching $rev"
-	cp $nexuiz_dev/$1 $nexuiz_dev/${rev}_patched
-	cd $nexuiz_dev/${rev}_patched
+	cp $nexuiz_dev/$1 $folder_to_patch
+	cd $folder_to_patch
 	patch -p0 < $1
 	rm $1
-	link_fteqcc $nexuiz_dev/${rev}_patched
+	link_fteqcc $folder_to_patch
+}
+
+function revert_patch {
+	echo "this function will revert a patch"
 }
 
 # System Functions
@@ -269,6 +283,22 @@ function environment_check {
 	if [[ ! -x $( whereis svn | sed "s/svn: //" | sed "s/ .*//" ) ]]; then echo "[ ERROR ] Couldnt locate subversion, please install it and run this script again";exit 0;fi
 	#if [[ ! -x $( whereis 7z | sed "s/7z: //" | sed "s/ .*//" ) ]]; then has7zip=0 ;else has7zip=1;fi
 	if [[ ! -d "$rootdir/svn" ]]; then echo "[x] Creating svn folder"; mkdir "$rootdir/svn";fi
+}
+
+# Icons
+function create_icon {
+	echo "#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=/home/tyler/nn_dev/nexuiz/icons/nexuiz_dev.png
+Name[en_US]=Nexuiz - Dev
+Exec=/home/tyler/nn_dev/nexuiz/ndt.sh --run_nexuiz d
+Name=Nexuiz - Dev
+Icon=/home/tyler/nn_dev/nexuiz/icons/nexuiz_dev.png" > nexuiz_dev.desktop
 }
 
 # Main Functions
@@ -381,8 +411,9 @@ ${B}OPTIONS${N}
 		The patch will be ouput to nexuiz_dev
 		${U}folder example${N}: nexuiz_vanilla/${prefix}_6677 and nexuiz_dev/${prefix}_6677
 
-	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}]
-		Copies a folder from vanilla and then patches it with the specified patch name.
+	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}|folder], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}|folder]
+		If a revision or nothing is specified, it copies a folder from vanilla and then patches it with the specified patch name.
+		If a folder is passed, it will patch the specific folder.  You can use this to patch a folder many times.
 
   ${B}Getting Help${N}
 	${B}--help${N}, ${B}-h${N}
@@ -414,10 +445,12 @@ case $1 in
   --compile_nexuiz_client|--cc) compile_nexuiz_client $2;;	# Compiles Nexuiz Client in the specified folder
   --compile_nexuiz_menu|--cm) compile_nexuiz_menu $2;;		# Compiles Nexuiz Menu in the specified folder
   --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
-  --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports nexuiz to the given folder, then compiles nexuiz
+  --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --run_nexuiz|-r) run_nexuiz $2;;							# Runs Nexuiz (specify version v/d)
   --create_patch|--cp) create_patch $2 $3;;					# Creates a diff patch by comparing vanilla and dev
-  --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision]
+  --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision|folder]
+  --revert_patch|--rp) revert_patch $2 $3;;					# Reverts a patch -- patchname, folder
+  #--create_icon) create_icon;;								# Internal command, incomplete
   *|--help|-h) help;;
 esac
