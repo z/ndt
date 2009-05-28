@@ -267,11 +267,22 @@ function apply_patch {
 	cd $folder_to_patch
 	patch -p0 < $1
 	rm $1
-	link_fteqcc $folder_to_patch
+	link_fteqcc $folder_to_patch # only really needed when copying folder
 }
 
 function revert_patch {
-	echo "this function will revert a patch"
+	if [[ ! -f $nexuiz_dev/$1 ]]; then echo "[ ERROR ] Specified patch $1 does not exist in $nexuiz_dev!  Please put the patch here to continue."; exit 0; fi
+	if [[ "$2" =~ [/]+ ]]; then
+		folder_to_patch=$2
+		rev=$(echo $folder_to_patch | awk -F / '{ print $NF }' | sed 's/\/*$//')
+	else
+		echo "[ ERROR ] Sorry, this command only takes folder names"
+	fi
+	echo "[x] Reverting patch $rev"
+	cp $nexuiz_dev/$1 $folder_to_patch
+	cd $folder_to_patch
+	patch -p0 -R < $1
+	rm $1
 }
 
 # System Functions
@@ -411,9 +422,12 @@ ${B}OPTIONS${N}
 		The patch will be ouput to nexuiz_dev
 		${U}folder example${N}: nexuiz_vanilla/${prefix}_6677 and nexuiz_dev/${prefix}_6677
 
-	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}|folder], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}|folder]
+	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}|${U}folder${N}], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}|${U}folder${N}]
 		If a revision or nothing is specified, it copies a folder from vanilla and then patches it with the specified patch name.
 		If a folder is passed, it will patch the specific folder.  You can use this to patch a folder many times.
+		
+	${B}--revert_patch${N} <${U}patch name${N}> <${U}folder${N}>, ${B}--rp${N} <${U}patch name${N}> <${U}folder${N}>
+		Reverts a patch by applying it in reverse to the specified folder.
 
   ${B}Getting Help${N}
 	${B}--help${N}, ${B}-h${N}
