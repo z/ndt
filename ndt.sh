@@ -283,6 +283,7 @@ function create_patch {
 	echo "[x] Cleaning patch of directory names"
 	sed -i 's#'$nexuiz_vanilla'/'$prefix$1'/##g; s#'$nexuiz_dev'/'$prefix$1'/##g' $nexuiz_dev/${2}.tmp
 	cat $nexuiz_dev/${2}.tmp >> $nexuiz_dev/$2
+	rm $nexuiz_dev/${2}.tmp
 }
 
 # Applies a properly formatted patch file
@@ -396,6 +397,7 @@ ${B}NAME${N}
 
 ${B}SYNOPSIS${N}
 	${B}ndt${N} [${B}option${N}]
+	${B}ndt${N} [${B}option${N}] [${B}folder${N}]
 	${B}ndt${N} [${B}option${N}] <${B}folder${N}>
 	${B}ndt${N} [${B}option${N}] [${B}revision${N}]
 	${B}ndt${N} ${B}--run_nexuiz${N} [${B}vanilla${N}|${B}dev${N}|${B}v${N}|${B}d${N}]
@@ -519,7 +521,7 @@ ${B}AUTHOR${N}
 	
 	Permission is granted to copy, distribute and/or modify this document under the terms of the MIT License.
 	
-NDT Version 0.7 Beta  |  May 27, 2009"
+NDT Version 0.7 Beta  |  May 28, 2009"
 }
 
 case $1 in
