@@ -22,8 +22,8 @@
 #
 # TODO:
 #  - GUI
+#  - support relative paths in folder params
 #  - option to zip the data directory
-#  - option to strip out unneeded files/folders for a server environment
 #  - create a smart loop to accept multiple parameters in one line
 #  - option for darkplaces CPU optimization
 #
@@ -252,8 +252,22 @@ function link_fteqcc { # $1 = folder
 
 # Builds Nexuiz in a specific directory
 function build_nexuiz {
+	echo "[x] Building Nexuiz in folder: $1"
 	if [[ ! -d $1 ]]; then mkdir $1; fi # $1 = folder
 	export_nexuiz $1
+}
+
+# Builds a stripped down Nexuiz server
+function build_nexuiz_server {
+	echo "[x] Building Nexuiz Server in folder: $1"
+	if [[ ! -d $1 ]]; then mkdir $1; fi # $1 = folder
+	export_nexuiz $1
+	server_folder=$(ls -dt $1/*/ | head -n1 | sed 's/\/*$//')
+	cd $server_folder
+	echo "[x] Removing unneeded files"
+	rm -rf misc Docs
+	cd data
+	rm -rf gfx demos sound textures video "$( if [[ "$with_maps" = 0 ]]; then echo maps;fi )"
 }
 
 # Developer Functions
@@ -474,6 +488,10 @@ ${B}OPTIONS${N}
 		Builds Nexuiz in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz${N}
 		${U}folder example${N}: /path/to/nexuiz_dev
 		
+	${B}--build_nexuiz_server${N} <${U}folder${N}>, ${B}--bs${N} <${U}folder${N}>
+		Builds a stripped down Nexuiz Server in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz_server${N}
+		${U}folder example${N}: /path/to/nexuiz_server
+		
   ${B}Developer Extras${N}	
 	${B}--create_patch${N} <${U}revision${N}> <${U}patch name${N}>, ${B}--cp${N} <${U}revision${N}> <${U}patch name${N}>
 		Creates a diff patch by comparing the vanilla and dev folders.  The same revision must exists in both folders.
@@ -526,6 +544,7 @@ case $1 in
   --compile_netradiant|--cr) compile_netradiant;;			# Compiles NetRadiant
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
+  --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
   --run_nexuiz|-r) run_nexuiz $2;;							# Runs Nexuiz (specify version v/d)
   --create_patch|--cp) create_patch $2 $3;;					# Creates a diff patch by comparing vanilla and dev
   --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision|folder]
