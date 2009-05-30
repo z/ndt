@@ -40,8 +40,6 @@ and a development version you can hack around in.
 TODO:
  - GUI
  - option to zip the data directory
- - option to strip out unneeded files/folders for a server environment
- - option to build NetRadiant
  - create a smart loop to accept multiple parameters in one line
  - option for darkplaces CPU optimization
 
