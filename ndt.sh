@@ -4,11 +4,12 @@
 # 
 # Nexuiz Development Toolz
 #
-# Version: 0.7 Beta
-# Released: 05/27/2009
+# Version: 0.8 Beta
+# Released: 05/31/2009
 # Created By: Tyler "-z-" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com)
 #
 # Required Software: subversion (svn)
+# For Nexuiz: sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev zenity
 # Optional Software: 7zip (in a future release)
 #
 # Description:
@@ -23,11 +24,10 @@
 # TODO:
 #  - GUI
 #  - support relative paths in folder params
-#  - option to zip the data directory
 #  - create a smart loop to accept multiple parameters in one line
 #  - option for darkplaces CPU optimization
 #
-# Copyright (c) 2008 Tyler "-z-" Mulligan of www.nexuizninjaz.com
+# Copyright (c) 2009 Tyler "-z-" Mulligan of www.nexuizninjaz.com
 # 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -259,6 +259,7 @@ function build_nexuiz {
 
 # Builds a stripped down Nexuiz server
 function build_nexuiz_server {
+	if [[ "$1" == "" ]]; then echo "[ ERROR ] Need a folder name, kthx!"; exit 0; fi
 	echo "[x] Building Nexuiz Server in folder: $1"
 	if [[ ! -d $1 ]]; then mkdir $1; fi # $1 = folder
 	export_nexuiz $1
@@ -267,7 +268,20 @@ function build_nexuiz_server {
 	echo "[x] Removing unneeded files"
 	rm -rf misc Docs
 	cd data
-	rm -rf gfx demos sound textures video "$( if [[ "$with_maps" = 0 ]]; then echo maps;fi )"
+	rm -rf gfx demos sound textures video qcsrc "$( if [[ "$with_maps" = 0 ]]; then echo maps;fi )"
+	if [[ $zip_server_data ]]; then zip_data_dir $server_folder; fi
+}
+
+# zips the data dir
+function zip_data_dir {
+	if [[ ! -d $1/data ]]; then echo "[ ERROR ] this directory does no contain a data directory"; exit 0; fi
+	echo "[x] Zipping Nexuiz data dir in folder: $1"
+	cd $1/data
+	pk3_name=data$( date +%Y%m%d ).pk3
+	7za a -tzip -mx=${compression_level} $pk3_name . -x!common-spog.pk3 -x!qcsrc
+	mv $pk3_name ..
+	rm -r *
+	mv ../$pk3_name .
 }
 
 # Developer Functions
@@ -493,6 +507,10 @@ ${B}OPTIONS${N}
 	${B}--build_nexuiz_server${N} <${U}folder${N}>, ${B}--bs${N} <${U}folder${N}>
 		Builds a stripped down Nexuiz Server in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz_server${N}
 		${U}folder example${N}: /path/to/nexuiz_server
+
+	${B}--zip_data_dir${N} <${U}folder${N}>, ${B}--zd${N} <${U}folder${N}>
+		Zips the data directory of a specific server
+		${U}folder example${N}: /path/to/nexuiz_vanilla/rev_6677
 		
   ${B}Developer Extras${N}	
 	${B}--create_patch${N} <${U}revision${N}> <${U}patch name${N}>, ${B}--cp${N} <${U}revision${N}> <${U}patch name${N}>
@@ -521,7 +539,7 @@ ${B}AUTHOR${N}
 	
 	Permission is granted to copy, distribute and/or modify this document under the terms of the MIT License.
 	
-NDT Version 0.7 Beta  |  May 28, 2009"
+NDT Version 0.8 Beta  |  May 31, 2009"
 }
 
 case $1 in
@@ -547,6 +565,7 @@ case $1 in
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
+  --zip_data_dir|--zd) zip_data_dir $2;;					# Zips the data directory for a specific folder
   --run_nexuiz|-r) run_nexuiz $2;;							# Runs Nexuiz (specify version v/d)
   --create_patch|--cp) create_patch $2 $3;;					# Creates a diff patch by comparing vanilla and dev
   --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision|folder]
