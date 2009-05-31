@@ -26,7 +26,8 @@ Released: 05/26/2009
 Created By: Tyler "-z-" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com)
 
 Required Software: subversion (svn)
-Optional Software: 7zip (in a future release)
+For Nexuiz (ubuntu users): sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev zenity
+Optional Software: 7zip
 
 Description:
 This script was created to help linux users create a local development
@@ -44,21 +45,16 @@ TODO:
  - option for darkplaces CPU optimization
 
 
-This is an early commit of the work I've done so far on the set of bash
-helper scripts I've dubbed "Nexuiz Development Toolz" which help Linux
-users checkout Darkplaces, FTEQCC and Nexuiz from SVN, compile them and
-optionally export two folders a "vanilla" or untouched version of Nexuiz
-and a "dev" copy for the user to hack around in and learn more about the
-game without worrying about breaking their "main" testing client
+This is a set of bash helper scripts I've dubbed "Nexuiz Development Toolz"
+to help Linux users checkout Darkplaces, FTEQCC and Nexuiz from SVN,
+compile them and optionally export two folders a "vanilla" or untouched
+version of Nexuiz and a "dev" copy for the user to hack around in and learn
+more about the game without worrying about breaking their "main" testing client
 
-Future releases will cover more Nexuiz related helpers, including the
-ability to compile the map making program, NetRadiant.
-
-Thanks to Soulbringer and Victim who's scripts influenced me / helped me
+Thanks to Soulbringer and victim who's scripts influenced me / helped me
 create this set of functions.
 
-Please read the comments as I've only been working on this for the past
-day and a half, I haven't written much documentation outside that.
+Type ./ndt --help to learn more
 
 I've included icons I use when I add the application to my panel using
 ./ndt.sh --run_nexuiz vanilla

@@ -359,7 +359,7 @@ function environment_check {
 
 # Moo
 function moo {
-	echo -e 'KAAAAAAAAAAAAAAAAAAAAZbKNMwRiQKiOKa%MOonMlKCZKddddddddddddddddddddZKKKKKKKKEKKKfAAfZKKKKKKKKKEKKGoohEAAAAAAAZKKKKKKKKKKKKGAAhEKKKKKKKhEjEZKKKKKKKKKKKKKKKKIIddddpKIZKKKKKKKKKKKKKKKKIIKKKKKIIZ' | sed 's/A/_/g;s/b/</g;s/C/>/g;s/d/-/g;s/E/\\/g;s/f/\^/g;s/G/(/g;s/h/)/g;s/I/|/g;s/j/\//g;s/K/ /g;s/l/!/g;s/M/e/g;s/n/m/g;s/O/s/g;s/p/w/g;s/Q/z/g;s/w/x/g;s/R/u/g;s/Z/\n/g;s/%/w/g;'
+	echo -e 'KAAAAAAAAAAAAAAAAAAAAZbKNMwRiQKiOKa%MOonMlKCZKddddddddddddddddddddZKKKKKKKKEKKKfAAfZKKKKKKKKKEKKGoohEAAAAAAAZKKKKKKKKKKKKGAAhEKKKKKKKhEjEZKKKKKKKKKKKKKKKKIIdddd%KIZKKKKKKKKKKKKKKKKIIKKKKKIIZ' | sed 's/A/_/g;s/b/</g;s/C/>/g;s/d/-/g;s/E/\\/g;s/f/\^/g;s/G/(/g;s/h/)/g;s/I/|/g;s/j/\//g;s/K/ /g;s/l/!/g;s/M/e/g;s/n/m/g;s/O/s/g;s/p/w/g;s/Q/z/g;s/w/x/g;s/R/u/g;s/Z/\n/g;s/%/w/g;'
 }
 
 # Icons
