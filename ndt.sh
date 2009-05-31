@@ -614,7 +614,7 @@ case $1 in
   --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
   --compile_netradiant|--cr) compile_netradiant;;			# Compiles NetRadiant
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
-  --nothing_to_see_here|moo) moo;;							# Someone's good at reading source code
+  --nothing_to_see_here|--moo) moo;;						# Someone's good at reading source code
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
   --zip_data_dir|--zd) zip_data_dir $2;;					# Zips the data directory for a specific folder
