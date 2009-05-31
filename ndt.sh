@@ -23,7 +23,6 @@
 #
 # TODO:
 #  - GUI
-#  - support relative paths in folder params
 #  - create a smart loop to accept multiple parameters in one line
 #  - option for darkplaces CPU optimization
 #
@@ -147,43 +146,63 @@ function compile_fteqcc {
 function compile_nexuiz_client {
 	if [[ $1 == "" ]]; then
 		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
-		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder!";
 	else
-		folder=$1
+		if [[ "$1" =~ ^[^/] ]]; then # relative path
+			folder=$core_dir/$1
+		else
+			folder=$1
+		fi
 	fi
-	echo "[x] Compiling Nexuiz Client"
+	if [[ ! -d $folder ]]; then echo "[ ERROR ] Folder $folder does not exist"; exit 0; fi
+	echo "[x] Compiling Nexuiz Client in folder: $folder"
 	cd "$folder/data/qcsrc/client"
 	./fteqcc.bin
 }
 function compile_nexuiz_menu {
 	if [[ $1 == "" ]]; then
 		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
-		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder!";
 	else
-		folder=$1
+		if [[ "$1" =~ ^[^/] ]]; then # relative path
+			folder=$core_dir/$1
+		else
+			folder=$1
+		fi
 	fi
-	echo "[x] Compiling Nexuiz Menu"
+	if [[ ! -d $folder ]]; then echo "[ ERROR ] Folder $folder does not exist"; exit 0; fi
+	echo "[x] Compiling Nexuiz Menu in folder: $folder"
 	cd "$folder/data/qcsrc/menu"
 	./fteqcc.bin
 }
 function compile_nexuiz_server {
 	if [[ $1 == "" ]]; then
 		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
-		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder!";
 	else
-		folder=$1
+		if [[ "$1" =~ ^[^/] ]]; then # relative path
+			folder=$core_dir/$1
+		else
+			folder=$1
+		fi
 	fi
-	echo "[x] Compiling Nexuiz Server"
+	if [[ ! -d $folder ]]; then echo "[ ERROR ] Folder $folder does not exist"; exit 0; fi
+	echo "[x] Compiling Nexuiz Server in folder: $folder"
 	cd "$folder/data/qcsrc/server"
 	./fteqcc.bin
 }
 function compile_nexuiz {
 	if [[ $1 == "" ]]; then
 		folder=$(ls -dt $nexuiz_dev/*/ | head -n1);
-		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder! ($folder)";
+		echo "[ WARNING ] Revision not specified, using latest exported revision in the dev folder!";
 	else
-		folder=$1
+		if [[ "$1" =~ ^[^/] ]]; then # relative path
+			folder=$core_dir/$1
+		else
+			folder=$1
+		fi
 	fi
+	if [[ ! -d $folder ]]; then echo "[ ERROR ] Folder $folder does not exist"; exit 0; fi
 	compile_nexuiz_server $folder || { echo "Error Nexuiz Server compilation failed"; exit 0; }
 	compile_nexuiz_client $folder || { echo "Error Nexuiz Client compilation failed"; exit 0; }
 	compile_nexuiz_menu $folder || { echo "Error Nexuiz Menu compilation failed"; exit 0; }
@@ -252,18 +271,29 @@ function link_fteqcc { # $1 = folder
 
 # Builds Nexuiz in a specific directory
 function build_nexuiz {
-	echo "[x] Building Nexuiz in folder: $1"
-	if [[ ! -d $1 ]]; then mkdir $1; fi # $1 = folder
-	export_nexuiz $1
+	if [[ "$1" == "" ]]; then echo "[ ERROR ] Need a folder name, kthx!"; exit 0; fi
+	if [[ "$1" =~ ^[^/] ]]; then # relative path
+		folder=$core_dir/$1
+	else
+		folder=$1
+	fi
+	echo "[x] Building Nexuiz in folder: $folder"
+	if [[ ! -d $folder ]]; then mkdir $folder; fi # $1 = folder
+	export_nexuiz $folder
 }
 
 # Builds a stripped down Nexuiz server
 function build_nexuiz_server {
 	if [[ "$1" == "" ]]; then echo "[ ERROR ] Need a folder name, kthx!"; exit 0; fi
+	if [[ "$1" =~ ^[^/] ]]; then # relative path
+		folder=$core_dir/$1
+	else
+		folder=$1
+	fi
 	echo "[x] Building Nexuiz Server in folder: $1"
-	if [[ ! -d $1 ]]; then mkdir $1; fi # $1 = folder
-	export_nexuiz $1
-	server_folder=$(ls -dt $1/*/ | head -n1 | sed 's/\/*$//')
+	if [[ ! -d $folder ]]; then mkdir $folder; fi # $1 = folder
+	export_nexuiz $folder
+	server_folder=$(ls -dt $folder/*/ | head -n1 | sed 's/\/*$//')
 	cd $server_folder
 	echo "[x] Removing unneeded files"
 	rm -rf misc Docs
@@ -274,9 +304,14 @@ function build_nexuiz_server {
 
 # zips the data dir
 function zip_data_dir {
-	if [[ ! -d $1/data ]]; then echo "[ ERROR ] this directory does no contain a data directory"; exit 0; fi
-	echo "[x] Zipping Nexuiz data dir in folder: $1"
-	cd $1/data
+	if [[ "$1" =~ ^[^/] ]]; then # relative path
+		folder=$core_dir/$1
+	else
+		folder=$1
+	fi
+	if [[ ! -d $folder/data ]]; then echo "[ ERROR ] this directory does no contain a data directory"; exit 0; fi
+	echo "[x] Zipping Nexuiz data dir in folder: $folder"
+	cd $folder/data
 	pk3_name=data$( date +%Y%m%d ).pk3
 	7za a -tzip -mx=${compression_level} $pk3_name . -x!common-spog.pk3 -x!qcsrc
 	mv $pk3_name ..
@@ -486,18 +521,22 @@ ${B}OPTIONS${N}
 	${B}--compile_nexuiz_client${N} [${U}folder${N}], ${B}--cc${N} [${U}folder${N}]
 		Compiles Nexuiz Client in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		${U}folder example${N}: nexuiz_dev/rev_6677
 		
 	${B}--compile_nexuiz_menu${N} [${U}folder${N}], ${B}--cm${N} [${U}folder${N}]
 		Compiles Nexuiz Menu in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		${U}folder example${N}: nexuiz_dev/rev_6677
 		
 	${B}--compile_nexuiz_server${N} [${U}folder${N}], ${B}--cs${N} [${U}folder${N}]
 		Compiles Nexuiz Server in the specified folder,
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		${U}folder example${N}: nexuiz_dev/rev_6677
 		
 	${B}--compile_nexuiz${N} [${U}folder${N}], ${B}--cn${N} [${U}folder${N}], ${B}-c${N} [${U}folder${N}]
 		Compiles Nexuiz in the specified folder
 		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		${U}folder example${N}: nexuiz_dev/rev_6677
 		
 	${B}--compile_netradiant${N}, ${B}--cr${N}
 		Compiles NetRadiant, no folder needed, stays put.
@@ -508,27 +547,34 @@ ${B}OPTIONS${N}
 	${B}--build_nexuiz${N} <${U}folder${N}>, ${B}-b${N} <${U}folder${N}>
 		Builds Nexuiz in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz${N}
 		${U}folder example${N}: /path/to/nexuiz_dev
+		${U}folder example${N}: nexuiz_dev
 		
 	${B}--build_nexuiz_server${N} <${U}folder${N}>, ${B}--bs${N} <${U}folder${N}>
 		Builds a stripped down Nexuiz Server in the speicified folder, it exports a copy and builds it.  This is not the same thing as ${B}--compile_nexuiz_server${N}
 		${U}folder example${N}: /path/to/nexuiz_server
+		${U}folder example${N}: nexuiz_server
 
 	${B}--zip_data_dir${N} <${U}folder${N}>, ${B}--zd${N} <${U}folder${N}>
 		Zips the data directory of a specific server
 		${U}folder example${N}: /path/to/nexuiz_vanilla/rev_6677
+		${U}folder example${N}: nexuiz_vanilla/rev_6677
 		
   ${B}Developer Extras${N}	
 	${B}--create_patch${N} <${U}revision${N}> <${U}patch name${N}>, ${B}--cp${N} <${U}revision${N}> <${U}patch name${N}>
 		Creates a diff patch by comparing the vanilla and dev folders.  The same revision must exists in both folders.
 		The patch will be ouput to nexuiz_dev
-		${U}folder example${N}: nexuiz_vanilla/${prefix}_6677 and nexuiz_dev/${prefix}_6677
+		${U}example${N}: folders must exist in nexuiz_vanilla/${prefix}_6677 nexuiz_dev/${prefix}_6677
 
 	${B}--apply_patch${N} <${U}patch name${N}> [${U}revision${N}|${U}folder${N}], ${B}-p${N} <${U}patch name${N}> [${U}revision${N}|${U}folder${N}]
 		If a revision or nothing is specified, it copies a folder from vanilla and then patches it with the specified patch name.
 		If a folder is passed, it will patch the specific folder.  You can use this to patch a folder many times.
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		!! Cannot do relative paths
 		
 	${B}--revert_patch${N} <${U}patch name${N}> <${U}folder${N}>, ${B}--rp${N} <${U}patch name${N}> <${U}folder${N}>
 		Reverts a patch by applying it in reverse to the specified folder.
+		${U}folder example${N}: /path/to/nexuiz_dev/rev_6677
+		!! Cannot do relative paths
 
   ${B}Getting Help${N}
 	${B}--help${N}, ${B}-h${N}
@@ -568,7 +614,7 @@ case $1 in
   --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
   --compile_netradiant|--cr) compile_netradiant;;			# Compiles NetRadiant
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
-  --moo) moo;;												# Someone's good at reading source code
+  --nothing_to_see_here|moo) moo;;							# Someone's good at reading source code
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
   --zip_data_dir|--zd) zip_data_dir $2;;					# Zips the data directory for a specific folder
