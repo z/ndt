@@ -40,7 +40,7 @@ and a development version you can hack around in.
 
 TODO:
  - GUI
- - option to zip the data directory
+ - support relative paths in folder params
  - create a smart loop to accept multiple parameters in one line
  - option for darkplaces CPU optimization
 
