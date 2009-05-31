@@ -353,8 +353,13 @@ function revert_patch {
 function environment_check {
 	if [[ ! ( -w "$core_dir" && -r "$core_dir" && -x "$core_dir" ) ]]; then echo "[ ERROR ] $core_dir does not have RWX permissions, please fix this and run this script again";exit 0;fi
 	if [[ ! -x $( whereis svn | sed "s/svn: //" | sed "s/ .*//" ) ]]; then echo "[ ERROR ] Couldnt locate subversion, please install it and run this script again";exit 0;fi
-	#if [[ ! -x $( whereis 7z | sed "s/7z: //" | sed "s/ .*//" ) ]]; then has7zip=0 ;else has7zip=1;fi
+	if [[ ! -x $( whereis 7z | sed "s/7z: //" | sed "s/ .*//" ) ]]; then echo "[ WARNING ] Couldn't locate 7z, you cannot zip the data directory without this!";fi
 	if [[ ! -d "$core_dir/svn" ]]; then echo "[x] Creating svn folder"; mkdir "$core_dir/svn";fi
+}
+
+# Moo
+function moo {
+	echo -e 'KAAAAAAAAAAAAAAAAAAAAZbKNMwRiQKiOKa%MOonMlKCZKddddddddddddddddddddZKKKKKKKKEKKKfAAfZKKKKKKKKKEKKGoohEAAAAAAAZKKKKKKKKKKKKGAAhEKKKKKKKhEjEZKKKKKKKKKKKKKKKKIIddddpKIZKKKKKKKKKKKKKKKKIIKKKKKIIZ' | sed 's/A/_/g;s/b/</g;s/C/>/g;s/d/-/g;s/E/\\/g;s/f/\^/g;s/G/(/g;s/h/)/g;s/I/|/g;s/j/\//g;s/K/ /g;s/l/!/g;s/M/e/g;s/n/m/g;s/O/s/g;s/p/w/g;s/Q/z/g;s/w/x/g;s/R/u/g;s/Z/\n/g;s/%/w/g;'
 }
 
 # Icons
@@ -530,7 +535,7 @@ ${B}OPTIONS${N}
 		You're looking at it.
 		
 ${B}FILES${N}
-	${U}my.ndt.conf${N}
+	${U}default.ndt.conf${N}
 		The default configuration file for NDT will all the SVN server settings, paths and customization options.
 		Feel free to create your own and change the source file in the top of ndt.sh
 
@@ -563,6 +568,7 @@ case $1 in
   --compile_nexuiz_server|--cs) compile_nexuiz_server $2;;	# Compiles Nexuiz Server in the specified folder
   --compile_netradiant|--cr) compile_netradiant;;			# Compiles NetRadiant
   --compile_and_build_all|--ca) compile_and_build_all $2;;	# Compiles and builds darkplaces, fteqcc, exports to vanilla then compiles nexuiz and copies to dev
+  --moo) moo;;												# Someone's good at reading source code
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
   --zip_data_dir|--zd) zip_data_dir $2;;					# Zips the data directory for a specific folder
