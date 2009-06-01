@@ -298,7 +298,7 @@ function build_nexuiz_server {
 	echo "[x] Removing unneeded files"
 	rm -rf misc Docs
 	cd data
-	rm -rf gfx demos sound textures video qcsrc "$( if [[ "$with_maps" = 0 ]]; then echo maps;fi )"
+	rm -rf gfx demos sound textures video qcsrc "$( if [[ "$with_maps" == 0 ]]; then echo maps;fi )"
 	if [[ $zip_server_data ]]; then zip_data_dir $server_folder; fi
 }
 
@@ -429,15 +429,17 @@ function upgrade_all {
 }
 
 function run_nexuiz {
-	if [[ "$1" == "vanilla" || "$1" == "v" || "$1" == "" ]]; then
+	version=$2
+	shift
+	if [[ "$version" == "vanilla" || "$version" == "v" || "$version" == "" ]]; then
 		latest_build=$(ls -dt $nexuiz_vanilla/*/ | head -n1 | sed 's/\/*$//')
 		echo "[x] Starting Nexuiz Vanilla: $latest_build"
-		$latest_build/nexuiz-$buildtype -basedir $latest_build -userdir ~/.nexuiz_vanilla
+		$latest_build/nexuiz-$buildtype -basedir $latest_build -userdir ~/.nexuiz_vanilla $@
 	fi
-	if [[ "$1" == "dev" || "$1" == "d" ]]; then
+	if [[ "$version" == "dev" || "$version" == "d" ]]; then
 		latest_build=$(ls -dt $nexuiz_dev/*/ | head -n1 | sed 's/\/*$//')
 		echo "[x] Starting Nexuiz Development: $latest_build"
-		$latest_build/nexuiz-$buildtype -basedir $latest_build -userdir ~/.nexuiz_dev
+		$latest_build/nexuiz-$buildtype -basedir $latest_build -userdir ~/.nexuiz_dev $@
 	fi
 }
 
@@ -472,8 +474,9 @@ ${B}OPTIONS${N}
 	${B}--upgrade_all${N}, ${B}-u${N}
 		Updates all SVN, compiles and builds all
 
-	${B}--run_nexuiz${N} [${U}version${N}], ${B}-r${N} [${U}version${N}]
+	${B}--run_nexuiz${N} [${U}version${N}] [${U}extra flags${N}], ${B}-r${N} [${U}version${N}] [${U}extra flags${N}]
 		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
+		${U}example${N}: ./ndt -r d +map aggressor
 
   ${B}SVN Related Options${N}
  	${B}--checkout_darkplaces${N} [${U}revision${N}]
@@ -618,7 +621,7 @@ case $1 in
   --build_nexuiz|-b) build_nexuiz $2;;						# Builds Nexuiz in the speicified folder
   --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
   --zip_data_dir|--zd) zip_data_dir $2;;					# Zips the data directory for a specific folder
-  --run_nexuiz|-r) run_nexuiz $2;;							# Runs Nexuiz (specify version v/d)
+  --run_nexuiz|-r) run_nexuiz $@;;							# Runs Nexuiz (specify version v/d)
   --create_patch|--cp) create_patch $2 $3;;					# Creates a diff patch by comparing vanilla and dev
   --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision|folder]
   --revert_patch|--rp) revert_patch $2 $3;;					# Reverts a patch -- patchname, folder
