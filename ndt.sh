@@ -443,6 +443,13 @@ function run_nexuiz {
 	fi
 }
 
+function run_netradiant {
+	if [[ ! -f $core_dir/svn/netradiant/trunk/install/radiant.x86 ]]; then echo "[ ERROR ] A compiled NetRadaint was not found"; fi
+	revision=$(svn info ~/nn_dev/nexuiz/svn/netradiant/trunk |grep Revision | awk -F ": " '{ print $2 }')
+	echo "[x] Starting NetRadiant: $revision"
+	$core_dir/svn/netradiant/trunk/install/radiant.x86
+}
+
 function help {
 	B=$(tput bold) # bold
 	U=$(tput smul) # underline
@@ -477,6 +484,9 @@ ${B}OPTIONS${N}
 	${B}--run_nexuiz${N} [${U}version${N}] [${U}extra flags${N}], ${B}-r${N} [${U}version${N}] [${U}extra flags${N}]
 		Runs a specified version of Nexuiz (vanilla|dev|v|d).  Defaults to vanilla if no param is passed.
 		${U}example${N}: ./ndt -r d +map aggressor
+		
+	${B}--run_netradiant${N}, ${B}--rn${N}, ${B}-n${N}
+		Runs the latest compiled NetRadiant
 
   ${B}SVN Related Options${N}
  	${B}--checkout_darkplaces${N} [${U}revision${N}]
@@ -622,6 +632,7 @@ case $1 in
   --build_nexuiz_server|--bs) build_nexuiz_server $2;;		# Builds a stripped down Nexuiz server in the speicified folder
   --zip_data_dir|--zd) zip_data_dir $2;;					# Zips the data directory for a specific folder
   --run_nexuiz|-r) run_nexuiz $@;;							# Runs Nexuiz (specify version v/d)
+  --run_netradiant|--rn|-n) run_netradiant;;				# Runs NetRadiant
   --create_patch|--cp) create_patch $2 $3;;					# Creates a diff patch by comparing vanilla and dev
   --apply_patch|-p) apply_patch $2 $3;;						# Applies a patch -- patchname, [revision|folder]
   --revert_patch|--rp) revert_patch $2 $3;;					# Reverts a patch -- patchname, folder
