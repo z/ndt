@@ -422,6 +422,27 @@ function install {
 	compile_and_build_all
 }
 
+# 'Installs' ndt by aliasing 'ndt' in your .bashrc
+function install_ndt {
+	if [[ $(egrep "alias ndt='.+'" ~/.bashrc |wc -l) > 0 ]]; then
+		echo "[ WARNING ] NDT is already installed, would you like to uninstall it and try again? (y/n)";
+		read answer
+		if [[ "$answer" == "y" ]]; then uninstall_ndt; fi
+	fi
+	echo -e "\n# Nexuiz Development Toolz\nalias ndt='$core_dir/ndt.sh'" >> $HOME/.bashrc
+	echo -e "[ Installed NDT ] In your next session, you will be able to use 'ndt' in any folder\n"
+	echo -e "[ Optionally ] To use 'ndt' immediately, you can:
+	        \n               1) type 'bash' to enter another session\n               2) Or you can paste the following alias into your current one:\n\n                  alias ndt='$core_dir/ndt.sh'\n"
+}
+# 'Uninstalls' ndt by removing the 'ndt' alias in your .bashrc
+function uninstall_ndt {
+	if [[ ! -f ~/.bashrc ]]; then echo -e "[ WARNING ] For some reason, you don't have a ~/.bashrc file, so NST is already uninstalled, you can delete the nst folder and all of its contents."; exit 0; fi
+	if [[ $(egrep "alias ndt='.+'" ~/.bashrc |wc -l) == 0 ]]; then echo "[ ERROR ] NDT is not installed"; exit 0; fi
+	sed -i "s/# Nexuiz Development Toolz//g" ~/.bashrc
+	sed -i 's/alias ndt.*//g' $HOME/.bashrc
+	echo -e "[ Uninstalled NDT ] You can no longer use 'ndt' in any folder"
+}
+
 # Upgrade all - the lazy way to upgrade and start fresh
 function upgrade_all {
 	update_all
@@ -477,6 +498,12 @@ ${B}OPTIONS${N}
   ${B}General Options${N}
 	${B}--install${N}, ${B}-i${N}
 		First Run ONLY!! Checks out and installs everything from SVN (darkplaces, fteqcc, Nexuiz, NetRadiant (optional in conf)).
+	
+	${B}--install_ndt${N}, ${B}--ndt${N}
+		Installs an 'ndt' alias in your .bashrc, allowing you to type 'ndt' from any folder on your system.
+	
+	${B}--uninstall_ndt${N}, ${B}--undt${N}
+		Uninstalls an 'ndt' alias in your .bashrc, no longer allowing you to type 'ndt' from any folder on your system.
 		
 	${B}--upgrade_all${N}, ${B}-u${N}
 		Updates all SVN, compiles and builds all
@@ -608,6 +635,8 @@ NDT Version 0.8 Beta  |  May 31, 2009"
 
 case $1 in
   --install|-i) install;;									# First Run -- checks out and installs everything
+  --install_ndt|--ndt) install_ndt;;						# 'Installs' ndt by aliasing 'ndt' in your .bashrc
+  --uninstall_ndt|--undt) uninstall_ndt;;					# 'Uninstalls' ndt by removing the 'ndt' alias in your .bashrc
   --upgrade_all|-u) upgrade_all;;							# Updates all SVN, compiles and builds all
   --checkout_darkplaces) checkout_darkplaces;;				# Checkout Darkplaces from SVN
   --checkout_fteqcc) checkout_fteqcc;;						# Checkout FTEQCC from SVN
