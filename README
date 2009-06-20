@@ -29,6 +29,9 @@ Required Software: subversion (svn)
 For Nexuiz (ubuntu users): sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev zenity
 Optional Software: 7zip
 
+Installation:
+Read INSTALL
+
 Description:
 This script was created to help linux users create a local development
 environment easily.  Making up for the downfalls of other build
@@ -40,7 +43,6 @@ and a development version you can hack around in.
 
 TODO:
  - GUI
- - support relative paths in folder params
  - create a smart loop to accept multiple parameters in one line
  - option for darkplaces CPU optimization
 

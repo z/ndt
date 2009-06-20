@@ -12,6 +12,9 @@
 # For Nexuiz: sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev
 # Optional Software: 7zip (in a future release)
 #
+# Installation:
+# Read INSTALL
+#
 # Description:
 # This script was created to help linux users create a local development
 # environment easily.  Making up for the downfalls of other build
@@ -518,6 +521,9 @@ ${B}OPTIONS${N}
 	${B}--install_ndt${N}, ${B}--ndt${N}
 		Installs an 'ndt' alias in your .bashrc, allowing you to type 'ndt' from any folder on your system.
 	
+	${B}--upgrade_ndt${N}, ${B}--updt${N}
+		Upgrades ndt if you installed by reading the INSTALL document.
+		
 	${B}--uninstall_ndt${N}, ${B}--undt${N}
 		Uninstalls an 'ndt' alias in your .bashrc, no longer allowing you to type 'ndt' from any folder on your system.
 		

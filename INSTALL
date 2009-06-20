@@ -1,0 +1,44 @@
+NEXUIZ DEVELOPMENT TOOLZ INSTALLATION DOCUMENT
+
+The following instructions are for installing NDT on a debian-based
+Linux system.  Other distros follow a similar installation.
+
+written by Tyler "-Z-" Mulligan of www.nexuizninjaz.com
+
+
+INSTALLING NDT
+
+1.) Install dependencies for Nexuiz:
+
+sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev  libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev zenity
+
+
+2.) Install git core and checkout ndt:
+
+sudo apt-get install git-core
+mkdir ~/nexuiz_development/ && cd ~/nexuiz_development
+git clone git://github.com/z/ndt.git
+cd ndt
+cp default.ndt.conf my.ndt.conf
+gedit my.ndt.conf
+
+
+3.) edit the settings in my.ndt.conf to reflect your environment then:
+
+sed -i 's/default.ndt.conf/my.ndt.conf/' ndt.sh
+chmod +x ndt.sh
+./ndt.sh -i
+
+
+This will checkout, compile and export Nexuiz (and optionally NetRadiant) for you, "installing" your development environment.
+
+
+
+4.) Anytime you need to update the script, use the following command:
+
+ndt --upgrade_ndt
+
+
+ADDITIONAL
+
+To track progress of the project: http://github.com/z/ndt/
