@@ -9,7 +9,7 @@
 # Created By: Tyler "-z-" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com)
 #
 # Required Software: subversion (svn)
-# For Nexuiz: sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev zenity
+# For Nexuiz: sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev
 # Optional Software: 7zip (in a future release)
 #
 # Description:
@@ -258,6 +258,13 @@ function export_nexuiz {
 	link_fteqcc $1/$prefix$rev
 	compile_nexuiz $1/$prefix$rev
 }
+function export_darkplaces {
+	rev=$(svn info $darkplaces_trunk |grep Revision |awk -F ": " '{ print $2 }')
+	echo "[x] Exporting Darkplaces revision: $rev"
+	svn export $darkplaces_trunk $darkplaces_dev/$prefix$rev # $1 = folder
+	if [[ ! -d $darkplaces_vanilla ]]; then mkdir $darkplaces_vanilla; fi
+	cp $darkplaces_dev/$prefix$rev $darkplaces_vanilla/$prefix$rev
+}
 
 # links fteqcc to the nexuiz directories that use the compiler
 function link_fteqcc { # $1 = folder
@@ -434,6 +441,15 @@ function install_ndt {
 	echo -e "[ Optionally ] To use 'ndt' immediately, you can:
 	        \n               1) type 'bash' to enter another session\n               2) Or you can paste the following alias into your current one:\n\n                  alias ndt='$core_dir/ndt.sh'\n"
 }
+
+# Upgrades ndt if you setup via git
+function upgrade_ndt {
+	echo -e "[ Upgrading NDT ]\n"
+	sed -i 's/my.ndt.conf/default.ndt.conf/' ndt.sh
+	git pull
+	sed -i 's/default.ndt.conf/my.ndt.conf/' ndt.sh
+}
+
 # 'Uninstalls' ndt by removing the 'ndt' alias in your .bashrc
 function uninstall_ndt {
 	if [[ ! -f ~/.bashrc ]]; then echo -e "[ WARNING ] For some reason, you don't have a ~/.bashrc file, so NST is already uninstalled, you can delete the nst folder and all of its contents."; exit 0; fi
@@ -636,6 +652,7 @@ NDT Version 0.8 Beta  |  May 31, 2009"
 case $1 in
   --install|-i) install;;									# First Run -- checks out and installs everything
   --install_ndt|--ndt) install_ndt;;						# 'Installs' ndt by aliasing 'ndt' in your .bashrc
+  --upgrade_ndt|--updt) upgrade_ndt;;						# Updates NDT if gotten with git and using 'my.ndt.conf'
   --uninstall_ndt|--undt) uninstall_ndt;;					# 'Uninstalls' ndt by removing the 'ndt' alias in your .bashrc
   --upgrade_all|-u) upgrade_all;;							# Updates all SVN, compiles and builds all
   --checkout_darkplaces) checkout_darkplaces;;				# Checkout Darkplaces from SVN
@@ -643,6 +660,7 @@ case $1 in
   --checkout_nexuiz) checkout_nexuiz;;						# Checkout Nexuiz from SVN
   --checkout_netradiant) checkout_netradiant;;				# Checkout NetRadiant from SVN
   --checkout_all) checkout_all;;							# Checkout everything from SVN
+  --export_darkplaces) export_darkplaces $2;;				# Export Darkplaces from SVN to dev and vanilla folders
   --update_darkplaces|--ud) update_darkplaces $2;;			# Updates Darkplaces SVN (optional revison)
   --update_fteqcc|--up) update_fteqcc $2;;					# Updates FTEQCC SVN (optional revison)
   --update_nexuiz|--un) update_nexuiz $2;;					# Updates Nexuiz SVN (optional revison)
