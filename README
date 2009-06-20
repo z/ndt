@@ -26,7 +26,7 @@ Released: 05/31/2009
 Created By: Tyler "-z-" Mulligan of the Nexuiz Ninjaz (www.nexuizninjaz.com)
 
 Required Software: subversion (svn)
-For Nexuiz (ubuntu users): sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev zenity
+For Nexuiz (ubuntu users): sudo apt-get install build-essential xserver-xorg-dev x11proto-xf86dri-dev x11proto-xf86dga-dev x11proto-xf86vidmode-dev libxxf86dga-dev libxcb-xf86dri0-dev libxpm-dev libxxf86vm-dev libsdl1.2-dev libsdl-image1.2-dev libsdl1.2debian-alsa subversion libclalsadrv-dev libasound2-dev libxext-dev
 Optional Software: 7zip
 
 Installation:
